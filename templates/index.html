@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Game Rooms</title>
+<style>
+body { font-family:sans-serif; background:#222; color:#fff; text-align:center; }
+a, button { display:block; margin:10px auto; padding:10px 20px; text-decoration:none; color:white; background:#007bff; border:none; border-radius:5px; width:200px; }
+a:hover, button:hover { background:#0056b3; }
+</style>
+</head>
+<body>
+<h1>Game Rooms</h1>
+<button onclick="window.location='/create-circle-room'">Buat Room Baru</button>
+
+<h2>Room yang tersedia:</h2>
+<ul>
+{% for room_id in rooms %}
+    <li><a href="/circle-room/{{ room_id }}">{{ room_id }}</a></li>
+{% else %}
+    <li>Tidak ada room aktif</li>
+{% endfor %}
+</ul>
+</body>
+</html>
