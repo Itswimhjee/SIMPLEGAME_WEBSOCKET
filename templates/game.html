@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Tic Tac Toe</title>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<style>
+body { font-family:sans-serif; background:#222; color:#fff; text-align:center; }
+#board { display:grid; grid-template-columns:repeat(3,100px); grid-gap:5px; margin:20px auto; }
+.cell { width:100px; height:100px; background:#444; display:flex; align-items:center; justify-content:center; font-size:2em; cursor:pointer; }
+.cell:hover { background:#555; }
+button { margin-top:10px; padding:10px 20px; border:none; border-radius:5px; background:#007bff; color:white; cursor:pointer; }
+button:hover { background:#0056b3; }
+</style>
+</head>
+<body>
+<h1>Tic Tac Toe</h1>
+
+<label>Nama: <input id="playerName" placeholder="Player"></label>
+<button id="joinBtn">Join Room</button>
+<button id="vsComputerBtn">Vs Computer</button>
+<h2>Turn: <span id="turnDisplay"></span></h2>
+<div id="board"></div>
+
+<button id="leaveBtn">Keluar Room</button>
+
+<script>
+const roomId = "{{ room_id }}";
+const socket = io();
+const boardDiv = document.getElementById("board");
+const turnDisplay = document.getElementById("turnDisplay");
+let playerName = "";
+
+function renderBoard(board){
+    boardDiv.innerHTML = "";
+    board.forEach((cell,i)=>{
+        const div = document.createElement("div");
+        div.classList.add("cell");
+        div.textContent = cell;
+        div.onclick = () => {
+            socket.emit("make_move",{room_id: roomId,index:i,name: playerName});
+        };
+        boardDiv.appendChild(div);
+    });
+}
+
+document.getElementById("joinBtn").onclick = ()=>{
+    playerName = document.getElementById("playerName").value || "Player1";
+    socket.emit("join_room_game",{room_id: roomId, name: playerName});
+};
+
+document.getElementById("vsComputerBtn").onclick = ()=>{
+    playerName = document.getElementById("playerName").value || "Player1";
+    socket.emit("join_room_game",{room_id: roomId, name: playerName, vs_computer:true});
+};
+
+document.getElementById("leaveBtn").onclick = ()=>{
+    socket.emit("leave_room",{room_id: roomId, name:playerName});
+    window.location = "/";
+};
+
+socket.on("update_state",data=>{
+    renderBoard(data.board);
+    turnDisplay.textContent = data.turn;
+});
+
+socket.on("game_over",data=>{
+    if(data.winner){
+        alert("Pemenang: "+data.winner);
+    } else {
+        alert("Seri!");
+    }
+});
+
+socket.on("room_full", ()=>{
+    alert("Room sudah penuh!");
+});
+</script>
+</body>
+</html>
